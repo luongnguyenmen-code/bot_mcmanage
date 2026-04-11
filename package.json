@@ -1,8 +1,16 @@
 {
+  "name": "bot-mcmanage",
+  "version": "1.0.0",
+  "description": "Minecraft Bot Manager",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
   "dependencies": {
-    "express": "^5.2.1",
+    "express": "^4.18.2",
     "minecraft-protocol": "^1.64.0",
     "mineflayer": "^4.35.0",
-    "socket.io": "^4.8.3"
+    "socket.io": "^4.8.3",
+    "path": "^0.12.7"
   }
 }
