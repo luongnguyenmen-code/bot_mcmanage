@@ -11,8 +11,7 @@ const io = new Server(server);
 
 // --- 1. LỚP BẢO MẬT PHẢI ĐẶT Ở ĐÂY ---
 app.use(basicAuth({
-    // Sử dụng biến môi trường hoặc mặc định là 'emluan123'
-    users: { 'admin': process.env.WEB_PASSWORD || 'emluan123' }, 
+    users: { 'admin': process.env.WEB_PASSWORD || '9awdhgg3kakg2ydkah' }, 
     challenge: true,
     realm: 'Minecraft Bot Manager',
 }));
