@@ -1,0 +1,8 @@
+{
+  "dependencies": {
+    "express": "^5.2.1",
+    "minecraft-protocol": "^1.64.0",
+    "mineflayer": "^4.35.0",
+    "socket.io": "^4.8.3"
+  }
+}
