@@ -1,54 +1,238 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
     <meta charset="UTF-8">
     <title>Minecraft Bot Manager</title>
     <script src="/socket.io/socket.io.js"></script>
     <style>
-        body { font-family: Arial, sans-serif; display: flex; height: 100vh; margin: 0; background: #1e1e1e; color: #fff; }
-        #sidebar { width: 320px; background: #2d2d2d; display: flex; flex-direction: column; border-right: 1px solid #444; }
-        #setup-panel { padding: 15px; border-bottom: 2px solid #555; background: #252525; }
-        #bot-list-container { flex: 1; overflow-y: auto; }
-        
-        #main { flex: 1; display: flex; flex-direction: column; padding: 20px; }
-        
-        .bot-item { padding: 10px 15px; cursor: pointer; border-bottom: 1px solid #444; display: flex; justify-content: space-between; align-items: center; }
-        .bot-item:hover { background: #3d3d3d; }
-        .bot-item.active { background: #005A9C; }
-        
-        .status { width: 12px; height: 12px; border-radius: 50%; }
-        .status.offline { background: #ff4d4d; box-shadow: 0 0 5px #ff4d4d; }
-        .status.connecting { background: #ffcc00; box-shadow: 0 0 5px #ffcc00;}
-        .status.online { background: #4caf50; box-shadow: 0 0 5px #4caf50;}
-        
-        .btn { padding: 8px 10px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; color: white; }
-        .btn-start { background: #4caf50; }
-        .btn-stop { background: #ff4d4d; }
-        .btn-blue { background: #007acc; width: 100%; margin-top: 10px; }
-        
-        .header-controls { margin-bottom: 20px; padding: 15px; background: #2d2d2d; border-radius: 8px; }
-        #bot-detail { display: none; background: #2d2d2d; padding: 20px; border-radius: 8px; flex: 1; display: flex; flex-direction: column;}
-        #chat-log { flex: 1; background: #111; padding: 10px; overflow-y: auto; font-family: monospace; margin-bottom: 10px; border-radius: 4px; }
-        
-        input, textarea { width: 100%; box-sizing: border-box; padding: 8px; background: #333; border: 1px solid #555; color: white; border-radius: 4px; margin-bottom: 5px; }
-        .flex-row { display: flex; gap: 5px; }
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            height: 100vh;
+            margin: 0;
+            background: #1e1e1e;
+            color: #fff;
+        }
+
+        #sidebar {
+            width: 320px;
+            background: #2d2d2d;
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid #444;
+        }
+
+        #setup-panel {
+            padding: 15px;
+            border-bottom: 2px solid #555;
+            background: #252525;
+        }
+
+        #bot-list-container {
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        #main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+        }
+
+        .bot-item {
+            padding: 10px 15px;
+            cursor: pointer;
+            border-bottom: 1px solid #444;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .bot-item:hover {
+            background: #3d3d3d;
+        }
+
+        .bot-item.active {
+            background: #005A9C;
+        }
+
+        .status {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .status.offline {
+            background: #ff4d4d;
+            box-shadow: 0 0 5px #ff4d4d;
+        }
+
+        .status.connecting {
+            background: #ffcc00;
+            box-shadow: 0 0 5px #ffcc00;
+        }
+
+        .status.online {
+            background: #4caf50;
+            box-shadow: 0 0 5px #4caf50;
+        }
+
+        .btn {
+            padding: 8px 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            color: white;
+        }
+
+        .btn-start {
+            background: #4caf50;
+        }
+
+        .btn-stop {
+            background: #ff4d4d;
+        }
+
+        .btn-blue {
+            background: #007acc;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .header-controls {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #2d2d2d;
+            border-radius: 8px;
+        }
+
+        #bot-detail {
+            display: none;
+            background: #2d2d2d;
+            padding: 20px;
+            border-radius: 8px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #chat-log {
+            flex: 1;
+            background: #111;
+            padding: 10px;
+            overflow-y: auto;
+            font-family: monospace;
+            margin-bottom: 10px;
+            border-radius: 4px;
+        }
+
+        input,
+        textarea {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 8px;
+            background: #333;
+            border: 1px solid #555;
+            color: white;
+            border-radius: 4px;
+            margin-bottom: 5px;
+        }
+
+        .flex-row {
+            display: flex;
+            gap: 5px;
+        }
+
+        /* Hiệu ứng chữ chạy Neon */
+        .marquee-container {
+            background: #000;
+            color: #00ff00;
+            padding: 5px 0;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 14px;
+            border-bottom: 1px solid #333;
+            overflow: hidden;
+            white-space: nowrap;
+        }
+
+        .marquee-text {
+            display: inline-block;
+            padding-left: 100%;
+            animation: marquee 15s linear infinite;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-shadow: 0 0 5px #00ff00;
+        }
+
+        @keyframes marquee {
+            0% {
+                transform: translate(0, 0);
+            }
+
+            100% {
+                transform: translate(-100%, 0);
+            }
+        }
+
+        /* Khung chứa GIF linh vật */
+        .mascot-container {
+            padding: 10px;
+            text-align: center;
+            border-bottom: 1px solid #444;
+        }
+
+        .mascot-container img {
+            width: 80px;
+            /* Tùy chỉnh kích thước GIF */
+            height: auto;
+            filter: drop-shadow(0 0 5px #e91e63);
+        }
     </style>
 </head>
+
 <body>
 
     <div id="sidebar">
+
+        <div class="marquee-container">
+            <div class="marquee-text">
+                ⚠️ TOOL Được Viết Và Phát Triển Bởi : Mến Nguyễn ⚠️
+            </div>
+        </div>
+
+        <div class="mascot-container">
+            <img src="https://firebasestorage.googleapis.com/v0/b/cornminer-edb42.firebasestorage.app/o/user_avatars%2F1775480264273_6090e6e273fb098c021795243ff14744.jpg?alt=media&token=06e4cc1b-bad7-4cb3-b630-aecc228b1718" alt="Mascot">
+        </div>
+
         <div id="setup-panel">
+            <div id="setup-panel" style="border-bottom: 2px solid #e91e63;">
+                <h3 style="margin-top: 0; color: #e91e63;">🌐 Server Minecraft</h3>
+                <input type="text" id="mc-host" placeholder="IP: 103.x.x.x" value="cornmc.vn">
+                <input type="number" id="mc-port" placeholder="Port: 25565" value="26700">
+                <button class="btn btn-blue" onclick="updateServerInfo()">Cập nhật Server</button>
+            </div>
             <h3 style="margin-top: 0;">🛠️ Nạp Account</h3>
-            <textarea id="raw-accounts" rows="4" placeholder="Nhập danh sách account...&#10;Mỗi account 1 dòng"></textarea>
-            
+            <textarea id="raw-accounts" rows="4"
+                placeholder="Nhập danh sách account...&#10;Mỗi account 1 dòng"></textarea>
+
             <div style="font-size: 12px; margin: 5px 0;">Hoặc tạo nhanh tự động:</div>
             <div class="flex-row">
                 <input type="text" id="prefix" placeholder="Prefix (VD: hutaomcrac)">
                 <input type="number" id="amount" placeholder="Số lượng" style="width: 80px;">
                 <button class="btn btn-start" onclick="generateAccounts()">Tạo</button>
             </div>
-            
+
             <button class="btn btn-blue" onclick="submitAccounts()">Lưu & Hiển thị danh sách</button>
+
+            <div class="flex-row" style="border-top: 1px solid #444; pt: 10px; margin-top: 10px;">
+                <input type="text" id="mass-chat-input" placeholder="Gửi lệnh cho TẤT CẢ bot (VD: /login, /spawn)..."
+                    style="margin-bottom: 0;">
+                <button class="btn btn-blue" style="width: 150px; margin-top: 0; background: #e91e63;"
+                    onclick="sendMassChat()">Gửi tất cả</button>
+            </div>
         </div>
 
         <div id="bot-list-container"></div>
@@ -63,11 +247,12 @@
         <div id="bot-detail" style="display: none;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
                 <h2 id="current-bot-name" style="margin: 0;">Chưa chọn bot</h2>
-                <button class="btn btn-start" id="toggle-current-btn" onclick="toggleCurrentBot()">Bật / Tắt Bot Này</button>
+                <button class="btn btn-start" id="toggle-current-btn" onclick="toggleCurrentBot()">Bật / Tắt Bot
+                    Này</button>
             </div>
-            
+
             <div id="chat-log"></div>
-            
+
             <div class="flex-row">
                 <input type="text" id="chat-input" placeholder="Nhập lệnh hoặc tin nhắn (VD: /rtp, /spawn)...">
                 <button class="btn btn-blue" style="width: 100px; margin-top: 0;" onclick="sendChat()">Gửi</button>
@@ -85,34 +270,50 @@
             const prefix = document.getElementById('prefix').value.trim();
             const amount = parseInt(document.getElementById('amount').value);
             if (!prefix || !amount || amount <= 0) return alert('Vui lòng nhập Prefix và Số lượng hợp lệ!');
-            
+
             let generated = [];
             for (let i = 1; i <= amount; i++) {
-                // Thêm số 0 ở trước nếu i < 10 (VD: 01, 02)
                 let num = String(i).padStart(2, '0');
                 generated.push(`${prefix}${num}`);
             }
-            
+
             // Đưa vào textarea
             const textarea = document.getElementById('raw-accounts');
             const currentVal = textarea.value.trim();
             textarea.value = currentVal ? currentVal + '\n' + generated.join('\n') : generated.join('\n');
         }
 
+        function updateServerInfo() {
+            const host = document.getElementById('mc-host').value;
+            const port = document.getElementById('mc-port').value;
+            socket.emit('updateConfig', { host, port: parseInt(port) });
+            alert('Đã cập nhật cấu hình server mới!');
+        }
+
         function submitAccounts() {
             const raw = document.getElementById('raw-accounts').value;
             const accounts = raw.split('\n').map(acc => acc.trim()).filter(acc => acc !== '');
             if (accounts.length === 0) return alert('Danh sách trống!');
-            
+
             socket.emit('setAccounts', accounts);
             document.getElementById('raw-accounts').value = ''; // Xoá form sau khi gửi
+        }
+
+        function sendMassChat() {
+            const input = document.getElementById('mass-chat-input');
+            const msg = input.value.trim();
+            if (!msg) return alert('Vui lòng nhập lệnh!');
+
+            // Gửi sự kiện riêng cho server
+            socket.emit('sendMassChat', msg);
+            input.value = '';
         }
 
         // --- CÁC HÀM XỬ LÝ SOCKET & UI ---
         socket.on('init', (bots) => {
             const container = document.getElementById('bot-list-container');
             container.innerHTML = '<div style="padding: 10px 15px; color: #aaa; border-bottom: 1px solid #444;">Danh sách Bot quản lý:</div>';
-            
+
             bots.forEach(bot => {
                 botStatuses[bot.username] = bot.status;
                 container.innerHTML += `
@@ -142,10 +343,10 @@
             currentSelectedBot = username;
             document.querySelectorAll('.bot-item').forEach(el => el.classList.remove('active'));
             document.getElementById(`item-${username}`).classList.add('active');
-            
+
             document.getElementById('bot-detail').style.display = 'flex';
             document.getElementById('current-bot-name').innerText = `🤖 Tab Điều Khiển: ${username}`;
-            document.getElementById('chat-log').innerHTML = ''; 
+            document.getElementById('chat-log').innerHTML = '';
         }
 
         function toggleCurrentBot() {
@@ -166,4 +367,5 @@
         });
     </script>
 </body>
+
 </html>

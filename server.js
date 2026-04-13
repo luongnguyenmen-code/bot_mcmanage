@@ -9,20 +9,22 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
 
-// --- 1. LỚP BẢO MẬT PHẢI ĐẶT Ở ĐÂY ---
+// 1. Bảo mật: Ưu tiên mật khẩu từ hệ thống, nếu không có mới dùng mật mã dự phòng
+const ADMIN_USER = process.env.WEB_USER || 'admin';
+const ADMIN_PASS = process.env.WEB_PASSWORD || 'ahwetygdjahwdk2323sdba';
+
 app.use(basicAuth({
-    users: { 'admin': process.env.WEB_PASSWORD || '9awdhgg3kakg2ydkah' }, 
+    users: { [ADMIN_USER]: ADMIN_PASS }, 
     challenge: true,
     realm: 'Minecraft Bot Manager',
 }));
 
-// --- 2. SAU ĐÓ MỚI ĐẾN CÁC FILE TĨNH ---
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Thông tin máy chủ - Có thể tùy chỉnh qua Variables nếu muốn
+// 2. Cấu hình Server: Cho phép lấy IP/Port từ Biến môi trường
 const MC_SERVER = { 
-    host: process.env.MC_HOST || '180.93.103.76', 
-    port: parseInt(process.env.MC_PORT) || 26700 
+    host: process.env.MC_HOST || '127.0.0.1', // Mặc định là localhost nếu chưa cài
+    port: parseInt(process.env.MC_PORT) || 25565 
 };
 
 // Lưu trữ trạng thái
@@ -67,10 +69,17 @@ function createBot(username) {
 
 // Socket.io Logic
 io.on('connection', (socket) => {
+    
     socket.emit('init', configuredAccounts.map(u => ({
         username: u,
         status: activeBots.has(u) ? 'online' : 'offline'
     })));
+
+    socket.on('updateConfig', (data) => {
+        MC_SERVER.host = data.host;
+        MC_SERVER.port = data.port;
+        console.log(`📡 Đã đổi Server Target sang: ${MC_SERVER.host}:${MC_SERVER.port}`);
+    });
 
     socket.on('setAccounts', (usernames) => {
         configuredAccounts = [...new Set([...configuredAccounts, ...usernames])];
@@ -84,6 +93,16 @@ io.on('connection', (socket) => {
         configuredAccounts.forEach((username, i) => {
             // Delay 5s mỗi bot để tránh bị kick do join quá nhanh
             setTimeout(() => createBot(username), i * 5000);
+        });
+    });
+
+    socket.on('sendMassChat', (message) => {
+        let delay = 0;
+        activeBots.forEach((bot, username) => {
+            setTimeout(() => {
+                if (bot) bot.chat(message);
+            }, delay);
+            delay += 500; // Mỗi bot cách nhau 0.5 giây để tránh bị kick spam
         });
     });
 
