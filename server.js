@@ -23,7 +23,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // 2. Cấu hình Server: Cho phép lấy IP/Port từ Biến môi trường
 const MC_SERVER = { 
-    host: process.env.MC_HOST || '127.0.0.1', // Mặc định là localhost nếu chưa cài
+    host: process.env.MC_HOST || '180.93.103.201', 
     port: parseInt(process.env.MC_PORT) || 25565 
 };
 
